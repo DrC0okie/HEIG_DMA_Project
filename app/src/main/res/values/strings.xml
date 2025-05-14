@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">NearNote</string>
+    <string name="write_all_field">Veuillez remplir tous les champs obligatoires</string>
+    <string name="edit_note">EDIT_NOTE</string>
+    <string name="add_note">ADD_NOTE</string>
+    <string name="delete_note">Supprimer la note</string>
+    <string name="confirm_delete_note">Êtes-vous sûr de vouloir supprimer cette note ?</string>
+    <string name="delete">Supprimer</string>
+    <string name="abort">Annuler</string>
+    <string name="modify_note_title">Modifier la note</string>
+    <string name="add_note_title">Ajouter une note</string>
 </resources>
