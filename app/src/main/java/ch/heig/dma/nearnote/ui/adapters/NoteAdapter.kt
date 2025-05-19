@@ -13,12 +13,6 @@ import androidx.recyclerview.widget.ListAdapter
 
 class NoteAdapter : ListAdapter<Note, NoteAdapter.ViewHolder>(NoteDiffCallback()) {
 
-    var notes: List<Note> = emptyList()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-
     // Callbacks pour les actions
     var onNoteClickListener: ((Note) -> Unit)? = null
     var onNoteDeleteListener: ((Note) -> Unit)? = null

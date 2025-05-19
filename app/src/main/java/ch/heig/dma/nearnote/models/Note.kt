@@ -10,8 +10,8 @@ data class Note(
     val title: String,
     val text: String,
     val locationName: String,
-    val latitude: Double,   // TODO : Peut être utile
-    val longitude: Double,  // TODO : Peut être utile
+    val latitude: Double,
+    val longitude: Double,
     val radius: Float = 100f,  // Rayon en mètres pour le géofencing
     val isActive: Boolean = true
 )

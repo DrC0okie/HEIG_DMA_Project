@@ -9,4 +9,10 @@
     <string name="abort">Annuler</string>
     <string name="modify_note_title">Modifier la note</string>
     <string name="add_note_title">Ajouter une note</string>
+    <string name="confirm_location">Confirm Location</string>
+    <string name="select_location">Please select a location on the map</string>
+    <string name="location_selected_marker_title">Location</string>
+    <string name="geocoding_error">Could not find address for this location.</string>
+    <string name="location_name_hint">Enter location name (e.g., Home, Work)</string>
+    <string name="poi_selected_toast">Selected: %s</string>
 </resources>
