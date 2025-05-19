@@ -1,6 +1,5 @@
 package ch.heig.dma.nearnote.ui.adapters
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +8,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ch.heig.dma.nearnote.R
 import ch.heig.dma.nearnote.models.Note
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 
-class NoteAdapter : RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
+class NoteAdapter : ListAdapter<Note, NoteAdapter.ViewHolder>(NoteDiffCallback()) {
 
     var notes: List<Note> = emptyList()
-        @SuppressLint("NotifyDataSetChanged")
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -29,10 +29,8 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
         return ViewHolder(view)
     }
 
-    override fun getItemCount() = notes.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(notes[position])
+        holder.bind(getItem(position))
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -53,6 +51,16 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
             btnDelete.setOnClickListener {
                 onNoteDeleteListener?.invoke(note)
             }
+        }
+    }
+
+    class NoteDiffCallback : DiffUtil.ItemCallback<Note>() {
+        override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
+            return oldItem == newItem
         }
     }
 }

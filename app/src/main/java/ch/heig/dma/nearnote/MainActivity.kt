@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
+        viewModel = ViewModelProvider(this)[NoteViewModel::class.java]
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         adapter = NoteAdapter()
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.notes.observe(this) { notes ->
-            adapter.notes = notes
+            adapter.submitList(notes)
         }
 
         findViewById<FloatingActionButton>(R.id.fabAddNote).setOnClickListener {
