@@ -26,13 +26,9 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedLocationName = MutableLiveData<String?>()
     val selectedLocationName: LiveData<String?> = _selectedLocationName
 
-    fun setSelectedLocation(latitude: Double, longitude: Double) {
-        _selectedLocation.value = Pair(latitude, longitude)
-        _selectedLocationName.value = null
-    }
-
-    fun setSelectedLocationWithName(latitude: Double, longitude: Double, name: String?) {
-        _selectedLocation.value = Pair(latitude, longitude)
+    /** @param name optional display name; null → clear name */
+    fun selectLocation(latitude: Double, longitude: Double, name: String? = null) {
+        _selectedLocation.value = latitude to longitude
         _selectedLocationName.value = name
     }
 

@@ -2,7 +2,6 @@ package ch.heig.dma.nearnote.ui.fragment
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -10,6 +9,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import ch.heig.dma.nearnote.R
 import ch.heig.dma.nearnote.databinding.FragmentMapBinding
+import ch.heig.dma.nearnote.utils.MapViewLifecycleObserver
+import ch.heig.dma.nearnote.utils.viewBinding
 import ch.heig.dma.nearnote.viewModel.NoteViewModel
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -23,38 +24,27 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
-class MapFragment : DialogFragment(), OnMapReadyCallback, GoogleMap.OnPoiClickListener {
+class MapFragment : DialogFragment(R.layout.fragment_map), OnMapReadyCallback, GoogleMap.OnPoiClickListener {
 
-    private var _binding: FragmentMapBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(FragmentMapBinding::bind)
 
     private lateinit var viewModel: NoteViewModel
     private var googleMap: GoogleMap? = null
     private var currentSelectedMarker: Marker? = null
     private var currentSelectedLatLng: LatLng? = null
-
     private val defaultLocation = LatLng(47.3769, 8.5417)
     private val defaultZoom = 10f
     private val selectedZoom = 16f
     private var currentSelectedPlaceName: String? = null
     private var currentSelectedPlaceAddress: String? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewModel = ViewModelProvider(requireActivity())[NoteViewModel::class.java]
-
-        binding.mapView.onCreate(savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(
+            MapViewLifecycleObserver(binding.mapView, savedInstanceState)
+        )
+        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         binding.mapView.getMapAsync(this)
-
+        viewModel = ViewModelProvider(requireActivity())[NoteViewModel::class.java]
         setupAutocompleteFragment()
 
         binding.btnConfirmLocation.setOnClickListener {
@@ -70,14 +60,14 @@ class MapFragment : DialogFragment(), OnMapReadyCallback, GoogleMap.OnPoiClickLi
                     else -> null // No name or address from map pick, AddNoteFragment will geocode
                 }
                 if (displayNameForViewModel != null) {
-                    viewModel.setSelectedLocationWithName(
+                    viewModel.selectLocation(
                         latLng.latitude,
                         latLng.longitude,
                         displayNameForViewModel
                     )
                 } else {
                     // Raw map click, no name/address from POI/Search.
-                    viewModel.setSelectedLocation(latLng.latitude, latLng.longitude)
+                    viewModel.selectLocation(latLng.latitude, latLng.longitude)
                 }
                 dismiss()
             } ?: run {
@@ -170,40 +160,23 @@ class MapFragment : DialogFragment(), OnMapReadyCallback, GoogleMap.OnPoiClickLi
         googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, selectedZoom))
     }
 
-    override fun onResume() {
-        super.onResume()
-        _binding?.mapView?.onResume()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        _binding?.mapView?.onPause()
-    }
-
     override fun onDestroyView() {
         googleMap = null
         currentSelectedMarker = null
         currentSelectedLatLng = null
         currentSelectedPlaceName = null
         currentSelectedPlaceAddress = null
-        _binding?.mapView?.onDestroy()
-        _binding = null
         super.onDestroyView()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        _binding?.mapView?.onLowMemory()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        _binding?.mapView?.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     companion object {

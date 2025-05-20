@@ -5,49 +5,54 @@ import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import ch.heig.dma.nearnote.R
 import ch.heig.dma.nearnote.databinding.FragmentAddNoteBinding
+import ch.heig.dma.nearnote.models.Location
 import ch.heig.dma.nearnote.viewModel.NoteViewModel
 import ch.heig.dma.nearnote.models.Note
+import ch.heig.dma.nearnote.utils.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 
-class AddNoteFragment : DialogFragment() {
-
-    private var _binding: FragmentAddNoteBinding? = null
-    private val binding get() = _binding!!
+class AddNoteFragment : DialogFragment(R.layout.fragment_add_note) {
+    private val binding by viewBinding(FragmentAddNoteBinding::bind)
 
     private lateinit var viewModel: NoteViewModel
     private var editingNote: Note? = null
-    private var geocodingInProgress = false
+    private var geocodeJob: Job? = null
 
     companion object {
-        fun newInstance(note: Note? = null): AddNoteFragment {
-            val fragment = AddNoteFragment()
-            fragment.editingNote = note
-            return fragment
-        }
+        private const val ARG_NOTE = "ARG_NOTE"
+        fun newInstance(note: Note?): AddNoteFragment =
+            AddNoteFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_NOTE, note)
+                }
+            }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentAddNoteBinding.inflate(inflater, container, false)
-        return binding.root
+    @Suppress("DEPRECATION")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        editingNote = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arguments?.getParcelable(ARG_NOTE, Note::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            arguments?.getParcelable<Note>(ARG_NOTE)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,7 +71,7 @@ class AddNoteFragment : DialogFragment() {
             binding.etText.setText(note.text)
 
             if (note.latitude != 0.0 || note.longitude != 0.0) {
-                viewModel.setSelectedLocationWithName(note.latitude, note.longitude, note.locationName)
+                viewModel.selectLocation(note.latitude, note.longitude, note.locationName)
             } else {
                 viewModel.clearSelectedLocation()
             }
@@ -84,35 +89,31 @@ class AddNoteFragment : DialogFragment() {
                 binding.btnClearLocation.visibility = View.VISIBLE
                 if (displayNameFromViewModel != null) {
                     // A display name was provided
-                    binding.tvLocationDisplay.setText(displayNameFromViewModel)
+                    binding.tvLocationDisplay.text = displayNameFromViewModel
                 } else {
                     // No display name provided from ViewModel, we should geocode the currentSelectedCoordinates.
                     reverseGeocode(currentSelectedCoordinates.first, currentSelectedCoordinates.second)
                 }
             } else {
                 // No location (lat/lng) is selected, so clear the location name field.
-                binding.tvLocationDisplay.setText("")
+                binding.tvLocationDisplay.text = ""
                 binding.btnClearLocation.visibility = View.GONE
             }
         }
     }
 
     private fun reverseGeocode(latitude: Double, longitude: Double) {
-        if (geocodingInProgress) return
-        geocodingInProgress = true
-
-        lifecycleScope.launch {
+        geocodeJob?.cancel()
+        geocodeJob = viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val addressText = fetchAddress(latitude, longitude)
-                binding.tvLocationDisplay.setText(addressText)
+                binding.tvLocationDisplay.text = addressText
                 viewModel.selectedLocation.value?.let { coords ->
-                    viewModel.setSelectedLocationWithName(coords.first, coords.second, addressText)
+                    viewModel.selectLocation(coords.first, coords.second, addressText)
                 }
             } catch (e: Exception) {
                 Log.e("AddNoteFragment", "Error fetching address: ${e.message}", e)
-                binding.tvLocationDisplay.setText(getString(R.string.geocoding_error))
-            } finally {
-                geocodingInProgress = false
+                binding.tvLocationDisplay.text = getString(R.string.geocoding_error)
             }
         }
     }
@@ -209,42 +210,30 @@ class AddNoteFragment : DialogFragment() {
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val text = binding.etText.text.toString().trim()
-            val locationName = binding.tvLocationDisplay.text.toString().trim()
-            val currentSelectedLocPair = viewModel.selectedLocation.value
 
             if (title.isEmpty()) {
-                Toast.makeText(context, getString(R.string.write_all_field), Toast.LENGTH_SHORT).show()
                 binding.etTitle.error = getString(R.string.write_all_field)
+                Toast.makeText(context, getString(R.string.write_all_field), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val finalLatitude: Double
-            val finalLongitude: Double
-            val finalLocationName: String
-
-            if (currentSelectedLocPair != null) {
-                finalLatitude = currentSelectedLocPair.first
-                finalLongitude = currentSelectedLocPair.second
-                finalLocationName = locationName
-            } else {
-                finalLatitude = 0.0
-                finalLongitude = 0.0
-                finalLocationName = ""
+            // Build a Location? only if coordinates were selected
+            val selectedPair = viewModel.selectedLocation.value
+            val location: Location? = selectedPair?.let { (lat, lng) ->
+                // Note: tvLocationDisplay already shows the "address" or fallback string
+                Location(lat, lng, binding.tvLocationDisplay.text.toString().trim())
             }
 
-            val noteToSave = editingNote?.copy(
-                title = title, text = text, locationName = finalLocationName,
-                latitude = finalLatitude, longitude = finalLongitude
-            ) ?: Note(
-                title = title, text = text, locationName = finalLocationName,
-                latitude = finalLatitude, longitude = finalLongitude
-            )
+            val baseNote = editingNote ?: Note()
+            val noteToSave = baseNote.updated(title, text, location)
 
+            // Dispatch to ViewModel
             if (editingNote != null) {
                 viewModel.update(noteToSave)
             } else {
                 viewModel.insert(noteToSave)
             }
+
             dismiss()
         }
 
@@ -256,11 +245,6 @@ class AddNoteFragment : DialogFragment() {
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
         viewModel.clearSelectedLocation()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onStart() {
