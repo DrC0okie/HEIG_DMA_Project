@@ -64,18 +64,15 @@ class AddNoteFragment : DialogFragment() {
             binding.tvDialogTitle.text = getString(R.string.modify_note_title)
             binding.etTitle.setText(note.title)
             binding.etText.setText(note.text)
-            binding.etLocation.setText(note.locationName)
 
             if (note.latitude != 0.0 || note.longitude != 0.0) {
                 viewModel.setSelectedLocationWithName(note.latitude, note.longitude, note.locationName)
             } else {
                 viewModel.clearSelectedLocation()
-                binding.etLocation.setText("")
             }
         } ?: run { // New note
             binding.tvDialogTitle.text = getString(R.string.add_note_title)
             viewModel.clearSelectedLocation()
-            binding.etLocation.setText("")
         }
     }
 
@@ -84,16 +81,18 @@ class AddNoteFragment : DialogFragment() {
             val currentSelectedCoordinates = viewModel.selectedLocation.value
 
             if (currentSelectedCoordinates != null) { // A location (lat/lng) is actually selected
+                binding.btnClearLocation.visibility = View.VISIBLE
                 if (displayNameFromViewModel != null) {
                     // A display name was provided
-                    binding.etLocation.setText(displayNameFromViewModel)
+                    binding.tvLocationDisplay.setText(displayNameFromViewModel)
                 } else {
                     // No display name provided from ViewModel, we should geocode the currentSelectedCoordinates.
                     reverseGeocode(currentSelectedCoordinates.first, currentSelectedCoordinates.second)
                 }
             } else {
                 // No location (lat/lng) is selected, so clear the location name field.
-                binding.etLocation.setText("")
+                binding.tvLocationDisplay.setText("")
+                binding.btnClearLocation.visibility = View.GONE
             }
         }
     }
@@ -105,13 +104,13 @@ class AddNoteFragment : DialogFragment() {
         lifecycleScope.launch {
             try {
                 val addressText = fetchAddress(latitude, longitude)
-                binding.etLocation.setText(addressText)
+                binding.tvLocationDisplay.setText(addressText)
                 viewModel.selectedLocation.value?.let { coords ->
                     viewModel.setSelectedLocationWithName(coords.first, coords.second, addressText)
                 }
             } catch (e: Exception) {
                 Log.e("AddNoteFragment", "Error fetching address: ${e.message}", e)
-                binding.etLocation.setText(getString(R.string.geocoding_error))
+                binding.tvLocationDisplay.setText(getString(R.string.geocoding_error))
             } finally {
                 geocodingInProgress = false
             }
@@ -203,10 +202,14 @@ class AddNoteFragment : DialogFragment() {
             mapFragment.show(parentFragmentManager, MapFragment.TAG)
         }
 
+        binding.btnClearLocation.setOnClickListener {
+            viewModel.clearSelectedLocation()
+        }
+
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val text = binding.etText.text.toString().trim()
-            val locationName = binding.etLocation.text.toString().trim()
+            val locationName = binding.tvLocationDisplay.text.toString().trim()
             val currentSelectedLocPair = viewModel.selectedLocation.value
 
             if (title.isEmpty()) {
@@ -215,14 +218,25 @@ class AddNoteFragment : DialogFragment() {
                 return@setOnClickListener
             }
 
-            val finalLatitude = currentSelectedLocPair?.first ?: editingNote?.latitude ?: 0.0
-            val finalLongitude = currentSelectedLocPair?.second ?: editingNote?.longitude ?: 0.0
+            val finalLatitude: Double
+            val finalLongitude: Double
+            val finalLocationName: String
+
+            if (currentSelectedLocPair != null) {
+                finalLatitude = currentSelectedLocPair.first
+                finalLongitude = currentSelectedLocPair.second
+                finalLocationName = locationName
+            } else {
+                finalLatitude = 0.0
+                finalLongitude = 0.0
+                finalLocationName = ""
+            }
 
             val noteToSave = editingNote?.copy(
-                title = title, text = text, locationName = locationName,
+                title = title, text = text, locationName = finalLocationName,
                 latitude = finalLatitude, longitude = finalLongitude
             ) ?: Note(
-                title = title, text = text, locationName = locationName,
+                title = title, text = text, locationName = finalLocationName,
                 latitude = finalLatitude, longitude = finalLongitude
             )
 

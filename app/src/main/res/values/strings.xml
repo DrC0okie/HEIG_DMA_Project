@@ -15,4 +15,5 @@
     <string name="geocoding_error">Could not find address for this location.</string>
     <string name="location_name_hint">Enter location name (e.g., Home, Work)</string>
     <string name="poi_selected_toast">Selected: %s</string>
+    <string name="no_location_selected_placeholder">Pas de lieu associé</string>
 </resources>
