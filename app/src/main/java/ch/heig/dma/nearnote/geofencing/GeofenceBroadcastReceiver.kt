@@ -107,7 +107,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             PendingIntent.getActivity(context, originalNoteId.toInt(), mainActivityIntent, pendingIntentFlags)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // TODO: Replace with app notification icon
+            .setSmallIcon(R.drawable.logo)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

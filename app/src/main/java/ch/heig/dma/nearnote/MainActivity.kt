@@ -17,6 +17,7 @@ import ch.heig.dma.nearnote.models.Note
 import ch.heig.dma.nearnote.ui.adapters.NoteAdapter
 import ch.heig.dma.nearnote.viewModel.NoteViewModel
 import ch.heig.dma.nearnote.ui.fragment.AddNoteFragment
+import ch.heig.dma.nearnote.ui.fragment.ViewNoteFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
@@ -213,8 +214,8 @@ class MainActivity : AppCompatActivity() {
                                 viewModel.notes.removeObserver(this)
 
                                 if (!isFinishing && !isDestroyed) {
-                                    val editFragment = AddNoteFragment.newInstance(targetNote)
-                                    editFragment.show(supportFragmentManager, "edit_note_from_geofence_${noteId}")
+                                    val viewFragment = ViewNoteFragment.newInstance(targetNote) // Create ViewNoteFragment
+                                    viewFragment.show(supportFragmentManager, "view_note_from_geofence_${noteId}")
                                 }
                             } else {
                                 if (notes.isNotEmpty()) {

@@ -7,122 +7,135 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-<TextView
-android:id="@+id/tvDialogTitle"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:layout_marginBottom="16dp"
-android:gravity="center"
-android:text="Ajouter une note"
-android:textSize="20sp"
-android:textStyle="bold" />
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="Ajouter une note"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-<com.google.android.material.textfield.TextInputLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:layout_marginTop="8dp">
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-<com.google.android.material.textfield.TextInputEditText
-    android:id="@+id/etTitle"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="Titre"
-    android:inputType="textCapSentences" />
-</com.google.android.material.textfield.TextInputLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-<com.google.android.material.textfield.TextInputLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
-<com.google.android.material.textfield.TextInputEditText
-    android:id="@+id/etText"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="Texte"
-    android:inputType="textMultiLine"
-    android:minLines="3"
-    android:gravity="top"/>
-</com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Titre"
+                    android:inputType="textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- New Layout for Location Display and Clear Button -->
-<TextView
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="Lieu:"
-android:labelFor="@+id/tvLocationDisplay"
-android:layout_marginTop="16dp"
-android:textAppearance="?attr/textAppearanceCaption"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
-<androidx.constraintlayout.widget.ConstraintLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:layout_marginTop="4dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="Texte"
+                    android:inputType="textMultiLine"
+                    android:minLines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-<TextView
-    android:id="@+id/tvLocationDisplay"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
-    android:paddingStart="12dp"
-    android:paddingEnd="8dp"
-    android:background="?attr/editTextBackground"
-    android:textAppearance="?attr/textAppearanceBody1"
-    android:textIsSelectable="true"
-    tools:text="Pas de lieu associé"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/btnClearLocation"
-    app:layout_constraintBottom_toBottomOf="parent"
-    android:hint="@string/no_location_selected_placeholder"
-    android:maxLines="2"
-    android:ellipsize="end"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@+id/tvLocationDisplay"
+                android:text="Lieu:"
+                android:textAppearance="?attr/textAppearanceCaption" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
 
+                <TextView
+                    android:id="@+id/tvLocationDisplay"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/editTextBackground"
+                    android:ellipsize="end"
+                    android:hint="@string/no_location_selected_placeholder"
+                    android:maxLines="2"
+                    android:paddingStart="12dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="12dp"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    android:textIsSelectable="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btnClearLocation"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Pas de lieu associé" />
 
-<ImageButton
-    android:id="@+id/btnClearLocation"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:src="@drawable/no_location"
-    android:background="?attr/selectableItemBackgroundBorderless"
-    android:visibility="gone"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@+id/tvLocationDisplay"
-    app:layout_constraintBottom_toBottomOf="@+id/tvLocationDisplay"
-    android:padding="8dp"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageButton
+                    android:id="@+id/btnClearLocation"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/clear_location_desc"
+                    android:padding="8dp"
+                    android:src="@drawable/no_location"
+                    android:visibility="gone"
+                    android:scaleType="fitCenter"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvLocationDisplay"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tvLocationDisplay"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <Button
+                android:id="@+id/btnSelectLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Sélectionner sur la carte" />
 
-<Button
-android:id="@+id/btnSelectLocation"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:layout_marginTop="16dp"
-android:text="Sélectionner sur la carte" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-<LinearLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:orientation="horizontal"
-android:layout_marginTop="24dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
 
-<Button
-    android:id="@+id/btnCancel"
-    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:layout_marginEnd="8dp"
-    android:text="Annuler" />
+        <Button
+            android:id="@+id/btnCancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Annuler" />
 
-<Button
-    android:id="@+id/btnSave"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:layout_marginStart="8dp"
-    android:text="Enregistrer" />
-</LinearLayout>
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Enregistrer" />
     </LinearLayout>
+</LinearLayout>

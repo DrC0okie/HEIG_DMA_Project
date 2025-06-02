@@ -16,4 +16,10 @@
     <string name="location_name_hint">Enter location name (e.g., Home, Work)</string>
     <string name="poi_selected_toast">Selected: %s</string>
     <string name="no_location_selected_placeholder">Pas de lieu associé</string>
+    <string name="view_note_title">View note details</string>
+    <string name="title_label">Title:</string>
+    <string name="text_label">Text:</string>
+    <string name="close_button_text">Close</string>
+    <string name="edit_button_text">Edit</string>
+    <string name="clear_location_desc">delete button</string>
 </resources>
