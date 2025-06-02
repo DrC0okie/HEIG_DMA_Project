@@ -22,4 +22,8 @@ class NoteRepository(private val noteDao: NoteDao) {
     suspend fun getNoteById(noteId: Long): Note? {
         return noteDao.getNoteById(noteId)
     }
+
+    suspend fun getActiveNotesForGeofencing(): List<Note> {
+        return noteDao.getActiveNotesForGeofencing()
+    }
 }

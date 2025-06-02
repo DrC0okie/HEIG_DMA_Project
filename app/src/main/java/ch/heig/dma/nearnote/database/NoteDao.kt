@@ -24,4 +24,7 @@ interface NoteDao {
 
     @Query("SELECT * FROM note WHERE id = :noteId")
     suspend fun getNoteById(noteId: Long): Note?
+
+    @Query("SELECT * FROM note WHERE isActive = 1 AND (latitude != 0.0 OR longitude != 0.0)")
+    suspend fun getActiveNotesForGeofencing(): List<Note>
 }
