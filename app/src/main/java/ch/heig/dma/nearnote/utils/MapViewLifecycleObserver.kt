@@ -5,6 +5,14 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.MapView
 
+/**
+ * Forwards Fragment lifecycle events to a [MapView].
+ * Used for resource management of a MapView when used within a Fragment.
+ *
+ * @property mapView The [MapView] instance to which lifecycle events will be forwarded.
+ * @property savedInstanceState The Bundle from [Fragment.onViewCreated] or [Fragment.onCreate],
+ *                              used for [MapView.onCreate].
+ */
 class MapViewLifecycleObserver(
     private val mapView: MapView,
     private val savedInstanceState: Bundle?

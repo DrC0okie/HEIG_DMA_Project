@@ -20,6 +20,12 @@ import ch.heig.dma.nearnote.ui.fragment.AddNoteFragment
 import ch.heig.dma.nearnote.ui.fragment.ViewNoteFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
+/**
+ * The main activity of the application.
+ * Displays a list of notes and handles user interactions for adding, viewing, and deleting notes.
+ * Also manages permission requests for location and geofencing.
+  * @author Walid Slimani, Jeremiah Steiner, Timothée Van Hove
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: NoteViewModel
@@ -27,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val requestCode = 123
 
     companion object {
+        /** Key for the Note ID passed in an Intent when launched from a geofence notification. */
         const val EXTRA_NOTE_ID_FROM_GEOFENCE = "ch.heig.dma.nearnote.NOTE_ID_FROM_GEOFENCE"
     }
 
@@ -41,17 +48,15 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        handleGeofenceIntent(intent)
+        handleGeofenceIntent(intent) // Handle intent if launched from notification
         checkAndRequestPermissions()
 
         adapter.onNoteClickListener = { note ->
-            // Ouvrir le fragment d'édition
             val editFragment = AddNoteFragment.newInstance(note)
             editFragment.show(supportFragmentManager, getString(R.string.edit_note))
         }
 
         adapter.onNoteDeleteListener = { note ->
-            // Confirmer la suppression
             showDeleteConfirmationDialog(note)
         }
 
@@ -64,16 +69,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Called when the activity is re-launched while at the top of the activity stack.
+     * Handles intents, such as those from geofence notifications.
+     * @param intent The new intent that was started for the activity.
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleGeofenceIntent(intent)
     }
 
+    /** Displays the dialog for adding a new note. */
     private fun showAddNoteDialog() {
         val addNoteFragment = AddNoteFragment()
         addNoteFragment.show(supportFragmentManager, getString(R.string.add_note))
     }
 
+    /**
+     * Shows a confirmation dialog before deleting a note.
+     * @param note The note to be deleted.
+     */
     private fun showDeleteConfirmationDialog(note: Note) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.delete_note))
@@ -85,6 +100,10 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Checks for necessary permissions (location, background location, notifications)
+     * and requests them if not already granted. Registers geofences if all permissions are granted.
+     */
     private fun checkAndRequestPermissions() {
         val permissionsToRequest = mutableListOf<String>()
         Log.d("MainActivity", "Checking permissions...")
@@ -123,6 +142,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Callback for the result from requesting permissions.
+     * This method is invoked for every call on [requestPermissions].
+     * @param requestCode The request code passed in [requestPermissions].
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions.
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (this.requestCode == requestCode) {
@@ -184,6 +210,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Displays a dialog informing the user that a required permission was denied permanently,
+     * and offers to open app settings.
+     * @param message The message to display in the dialog.
+     * @param permission The permission that was denied (used for logging, not currently used in dialog).
+     */
     private fun showPermissionDeniedDialog(message: String, permission: String) {
         AlertDialog.Builder(this)
             .setTitle("Permission Required")
@@ -199,6 +231,11 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Handles an intent that might have been triggered by a geofence notification.
+     * If the intent contains a note ID, it attempts to find and display that note.
+     * @param intent The intent to handle, can be null.
+     */
     private fun handleGeofenceIntent(intent: Intent?) {
         intent?.let { currentIntent ->
             if (currentIntent.hasExtra(EXTRA_NOTE_ID_FROM_GEOFENCE)) {
