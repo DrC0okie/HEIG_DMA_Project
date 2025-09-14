@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<!-- /!\ This API key is deactivated and won't work! create your own with your google account -->
 <resources>
     <string name="google_maps_key" translatable="false">AIzaSyApiobW17Q8rtre8MvMmQuhHRkubQlQm2s</string>
 </resources>
